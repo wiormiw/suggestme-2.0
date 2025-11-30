@@ -9,14 +9,14 @@ export const CookieOptions: ICookiesOptions = {
   accessToken: {
     httpOnly: true,
     secure: appEnv.NODE_ENV === 'production' ? true : false,
-    sameSite: appEnv.NODE_ENV === 'production' ? 'lax' : 'none',
+    sameSite: 'lax',
     maxAge: 60 * 15, // 15 minutes
     path: '/',
   },
   refreshToken: {
     httpOnly: true,
     secure: appEnv.NODE_ENV === 'production' ? true : false,
-    sameSite: appEnv.NODE_ENV === 'production' ? 'lax' : 'none',
+    sameSite: 'lax',
     maxAge: 60 * 60 * 24, // 1 day
     path: '/',
   },
