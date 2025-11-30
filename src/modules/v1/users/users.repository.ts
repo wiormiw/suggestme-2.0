@@ -1,5 +1,6 @@
 import { db } from '@/infrastructure/db';
 import { NewUser, User, users } from '@/infrastructure/db/schema/users';
+import { Direction } from '@/types/paginated';
 import { eq } from 'drizzle-orm';
 
 export abstract class UserRepository {
@@ -16,11 +17,18 @@ export abstract class UserRepository {
     return await db.query.users.findFirst({ where: eq(users.email, email) });
   }
 
-  static async findAll(limit: number, cursor?: string): Promise<User[]> {
+  static async findAll(limit: number, cursor?: string, direction: Direction = 'next'): Promise<User[]> {
     return await db.query.users.findMany({
       limit: limit + 1,
-      orderBy: (users, { asc }) => [asc(users.id)],
-      where: (users, { gt }) => (cursor ? gt(users.id, cursor) : undefined),
+      orderBy: (users, { asc, desc }) => [
+        direction === 'prev' ? desc(users.id) : asc(users.id)
+      ],
+      where: (users, { gt, lt }) => {
+        if (!cursor) return undefined;
+        return direction === 'prev' 
+          ? lt(users.id, cursor) 
+          : gt(users.id, cursor);
+      },
     });
   }
 

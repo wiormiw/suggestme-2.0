@@ -31,8 +31,8 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
         )
         .get(
           '/',
-          async ({ query: { limit, cursor } }) => {
-            const result = await FoodService.getAllFoods(limit, cursor);
+          async ({ query: { limit, cursor, direction } }) => {
+            const result = await FoodService.getAllFoods(limit, cursor, direction);
             if (!result.success) throw result.error;
             return ResponseFactory.success(result.data, 'Foods retrieved.');
           },

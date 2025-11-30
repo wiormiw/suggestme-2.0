@@ -31,8 +31,8 @@ export const usersController = new Elysia({ prefix: '/users', tags: ['Users'] })
       app
         .get(
           '/',
-          async ({ query: { limit, cursor } }) => {
-            const result = await UserService.getAllUsers(limit, cursor);
+          async ({ query: { limit, cursor, direction } }) => {
+            const result = await UserService.getAllUsers(limit, cursor, direction);
             if (!result.success) throw result.error;
             return ResponseFactory.success(result.data, 'Users retrieved.');
           },

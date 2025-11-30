@@ -1,5 +1,5 @@
 import { mapDbError } from '@/infrastructure/db';
-import { PaginatedList } from '@/types/paginated';
+import { Direction, PaginatedList } from '@/types/paginated';
 
 import { AppError } from '@/common/errors/app.error';
 import { AuthUtil } from '@/common/utils/auth.util';
@@ -81,15 +81,34 @@ export abstract class UserService {
   static async getAllUsers(
     limit: number,
     cursor?: string,
+    direction: Direction = 'next'
   ): Promise<Result<PaginatedList<UserResponseDto>, AppError>> {
     try {
-      const users = await UserRepository.findAll(limit, cursor);
-      let nextCursor: string | null = null;
-      if (users.length > limit) {
-        users.pop(); // proved there's more item
-        nextCursor = users[users.length - 1].id; // last item id
+      const users = await UserRepository.findAll(limit, cursor, direction);
+      const hasMore = users.length > limit;
+      if (hasMore) {
+        users.pop();
       }
-      return ok({ items: UserMapper.toDtoList(users), nextCursor });
+
+      if (direction === 'prev') {
+        users.reverse();
+      }
+      let nextCursor: string | null = null;
+      let prevCursor: string | null = null;
+      if (users.length > 0) {
+        nextCursor = users[users.length - 1].id;
+        prevCursor = users[0].id;
+      }
+      if (direction === 'next' && !cursor) {
+        prevCursor = null;
+      }
+      if (direction === 'prev' && !hasMore) {
+        prevCursor = null;
+      }
+      if (direction === 'next' && !hasMore) {
+        nextCursor = null;
+      }
+      return ok({ items: UserMapper.toDtoList(users), nextCursor, prevCursor });
     } catch (e) {
       return err(mapDbError(e));
     }

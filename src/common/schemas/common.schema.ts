@@ -28,12 +28,14 @@ export const refreshTokenSchema = t.Object({
 export const paginatedQuery = t.Object({
   limit: t.Numeric({ default: 10, maximum: 50 }),
   cursor: t.Optional(t.String()),
+  direction: t.Optional(t.Union([t.Literal('next'), t.Literal('prev')])),
 });
 
 export const createPaginatedSchema = <T extends TSchema>(itemSchema: T) =>
   t.Object({
     items: t.Array(itemSchema),
     nextCursor: t.Union([t.String(), t.Null()]),
+    prevCursor: t.Union([t.String(), t.Null()]),
   });
 
 export type IdResponse = Static<typeof idResponseSchema>;

@@ -3,6 +3,7 @@ import { Food, foods, NewFood } from '@/infrastructure/db/schema/foods.ts';
 import { eq, sql } from 'drizzle-orm';
 
 import { Mood } from '@/common/constants/foods.constants.ts';
+import { Direction } from '@/types/paginated';
 
 export abstract class FoodsRepository {
   static async create(food: NewFood): Promise<{ id: string } | undefined> {
@@ -17,11 +18,18 @@ export abstract class FoodsRepository {
     });
   }
 
-  static async findAll(limit: number, cursor?: string): Promise<Food[]> {
+  static async findAll(limit: number, cursor?: string, direction: Direction = 'next'): Promise<Food[]> {
     return await db.query.foods.findMany({
       limit: limit + 1,
-      orderBy: (foods, { asc }) => [asc(foods.id)],
-      where: (foods, { gt }) => (cursor ? gt(foods.id, cursor) : undefined),
+      orderBy: (foods, { asc, desc }) => [
+        direction === 'prev' ? desc(foods.id) : asc(foods.id)
+      ],
+      where: (foods, { gt, lt }) => {
+        if (!cursor) return undefined;
+        return direction === 'prev' 
+          ? lt(foods.id, cursor) 
+          : gt(foods.id, cursor);
+      },
     });
   }
 

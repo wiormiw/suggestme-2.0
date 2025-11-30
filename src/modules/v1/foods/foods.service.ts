@@ -1,5 +1,5 @@
 import { mapDbError } from '@/infrastructure/db';
-import { PaginatedList } from '@/types/paginated';
+import { Direction, PaginatedList } from '@/types/paginated';
 
 import { Mood } from '@/common/constants/foods.constants.ts';
 import { AppError } from '@/common/errors/app.error';
@@ -55,15 +55,34 @@ export abstract class FoodService {
   static async getAllFoods(
     limit: number,
     cursor?: string,
+    direction: Direction = 'next'
   ): Promise<Result<PaginatedList<FoodResponseDto>, AppError>> {
     try {
-      const foods = await FoodsRepository.findAll(limit, cursor);
-      let nextCursor: string | null = null;
-      if (foods.length > limit) {
-        foods.pop(); // proved there's more item
-        nextCursor = foods[foods.length - 1].id; // last item id
+      const foods = await FoodsRepository.findAll(limit, cursor, direction);
+      const hasMore = foods.length > limit;
+      if (hasMore) {
+        foods.pop();
       }
-      return ok({ items: FoodMapper.toDtoList(foods), nextCursor });
+
+      if (direction === 'prev') {
+        foods.reverse();
+      }
+      let nextCursor: string | null = null;
+      let prevCursor: string | null = null;
+      if (foods.length > 0) {
+        nextCursor = foods[foods.length - 1].id;
+        prevCursor = foods[0].id;
+      }
+      if (direction === 'next' && !cursor) {
+        prevCursor = null;
+      }
+      if (direction === 'prev' && !hasMore) {
+        prevCursor = null;
+      }
+      if (direction === 'next' && !hasMore) {
+        nextCursor = null;
+      }
+      return ok({ items: FoodMapper.toDtoList(foods), nextCursor, prevCursor });
     } catch (e) {
       return err(mapDbError(e));
     }
