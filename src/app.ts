@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { helmet } from 'elysia-helmet';
 import cookie from '@elysiajs/cookie';
+import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { ApiFailure } from '@/types/api';
 
@@ -11,7 +12,6 @@ import { appEnv } from './config';
 
 export function createApp() {
   return new Elysia()
-    .use(cookie())
     .use(
       appEnv.NODE_ENV !== 'production'
         ? swagger({
@@ -34,16 +34,24 @@ export function createApp() {
           })
         : (app) => app,
     )
+    .use(
+      cors({
+        origin: appEnv.CORS_ORIGIN,
+        credentials: true,
+        exposeHeaders: appEnv.CORS_EXPOSED_HEADERS,
+        allowedHeaders: appEnv.CORS_ALLOWED_HEADERS,
+        methods: appEnv.CORS_ALLOWED_METHODS,
+      }),
+    )
+    .use(cookie())
     .use(helmet())
     .onError(({ code, error }) => {
       let statusCode = 500;
       let response: ApiFailure = {
         success: false,
         code: 'INTERNAL_ERROR',
-        message: 'Something went wrong',
+        message: 'An unexpected problem occured.',
       };
-
-      // A. Handle Custom AppError
       if (error instanceof AppError) {
         statusCode = error.statusCode;
         response = {
@@ -57,18 +65,24 @@ export function createApp() {
         response = {
           success: false,
           code: 'VALIDATION_ERROR',
-          message: 'Invalid request data',
+          message: 'Invalid request data.',
           detail: { form_errors: error.all },
         };
       }
 
       return Response.json(response, { status: statusCode });
     })
-    .get('/boom', () => {
-      console.log('💥 Manual explosion triggered');
-      throw new AppError('TEST', 'I should be JSON!', 400);
-    })
     .get('/', () => ({ message: 'SuggestMe API v2.0' }))
     .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString() }))
-    .use(v1);
+    .use(v1)
+    .all('*', () => {
+      return Response.json(
+        {
+          success: false,
+          code: 'NOT_FOUND',
+          message: 'The requested resource or path was not found.',
+        },
+        { status: 404 },
+      );
+    });
 }

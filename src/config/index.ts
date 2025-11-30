@@ -7,6 +7,22 @@ const appEnvSchema = z.object({
   DB_URL: z.url().default('postgresql://myuser:mypassword@localhost:5432/suggestme'),
   JWT_SECRET: z.string().default('secret'),
   REFRESH_SECRET: z.string().default('refresh-secret'),
+  CORS_ORIGIN: z
+    .string()
+    .default('*')
+    .transform((str) => (str === '*' ? str : str.split(',').map((s) => s.trim()))),
+  CORS_EXPOSED_HEADERS: z
+    .string()
+    .default('*')
+    .transform((str) => (str === '*' ? str : str.split(',').map((s) => s.trim()))),
+  CORS_ALLOWED_METHODS: z
+    .string()
+    .default('*')
+    .transform((str) => (str === '*' ? str : str.split(',').map((s) => s.trim()))),
+  CORS_ALLOWED_HEADERS: z
+    .string()
+    .default('*')
+    .transform((str) => (str === '*' ? str : str.split(',').map((s) => s.trim()))),
 });
 
 // Parsing
