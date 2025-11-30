@@ -1,7 +1,19 @@
-import { Elysia } from "elysia";
+import { pool } from '@/infrastructure/db';
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+import { createApp } from './app';
+import { appEnv } from './config';
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+const server = createApp();
+
+server.listen(appEnv.PORT);
+console.log(`🦊 Elysia is running at ${server.server?.hostname}:${server.server?.port}`);
+
+const shutdown = async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await pool.end();
+  await server.stop();
+  process.exit(0);
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

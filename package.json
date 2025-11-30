@@ -1,15 +1,37 @@
 {
   "name": "suggestme-2.0",
-  "version": "1.0.50",
+  "version": "2.0",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "build:normal": "bun build ./src/index.ts --outdir ./dist --target bun",
+    "build:binary": "bun build ./src/index.ts --compile --outfile suggestme-api",
+    "start": "bun run --watch ./dist/index.js",
+    "format": "prettier --write .",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "seed:admin": "bun run scripts/seed-superadmin.ts",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:purge": "docker compose down --volumes"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@elysiajs/cookie": "^0.8.0",
+    "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/jwt": "^1.4.0",
+    "@elysiajs/swagger": "^1.3.1",
+    "drizzle-orm": "^0.44.7",
+    "elysia": "latest",
+    "elysia-helmet": "^3.0.0",
+    "pg": "^8.16.3",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@types/pg": "^8.15.6",
+    "bun-types": "latest",
+    "drizzle-kit": "^0.31.7",
+    "tsx": "^4.20.6"
   },
   "module": "src/index.js"
 }
