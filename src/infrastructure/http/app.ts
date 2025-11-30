@@ -45,7 +45,7 @@ export function createApp() {
     )
     .use(cookie())
     .use(helmet())
-    .onError(({ code, error }) => {
+    .onError(({ code, error, set }): ApiFailure => {
       let statusCode = 500;
       let response: ApiFailure = {
         success: false,
@@ -70,7 +70,8 @@ export function createApp() {
         };
       }
 
-      return Response.json(response, { status: statusCode });
+      set.status = statusCode;
+      return response;
     })
     .get('/', () => ({ message: 'SuggestMe API v2.0' }))
     .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString() }))
