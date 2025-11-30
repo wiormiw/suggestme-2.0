@@ -8,7 +8,7 @@ import { ApiFailure } from '@/types/api';
 import { AppError } from '@/common/errors/app.error';
 import { v1 } from '@/modules/v1';
 
-import { appEnv } from './config';
+import { appEnv } from '../../config';
 
 export function createApp() {
   return new Elysia()

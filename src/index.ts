@@ -1,6 +1,6 @@
 import { pool } from '@/infrastructure/db';
 
-import { createApp } from './app';
+import { createApp } from '@/infrastructure/http/app';
 import { appEnv } from './config';
 
 const server = createApp();
