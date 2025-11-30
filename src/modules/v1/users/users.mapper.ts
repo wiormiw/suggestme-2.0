@@ -1,4 +1,4 @@
-import { User } from '@/db/schema/users';
+import { User } from '@/infrastructure/db/schema/users';
 
 import { UserResponseDto } from './users.schema';
 

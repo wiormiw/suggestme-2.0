@@ -1,8 +1,10 @@
 import { t, TSchema } from 'elysia';
 import { ApiSuccess } from '@/types/api';
 
+import { createPaginatedSchema } from '@/common/schemas/common.schema';
+
 export abstract class ResponseFactory {
-  static success<T>(data: T | undefined, message: string): ApiSuccess<T | undefined> {
+  static success<T>(data: T, message: string): ApiSuccess<T> {
     return { success: true, message, data };
   }
 
@@ -11,5 +13,12 @@ export abstract class ResponseFactory {
       success: t.Boolean(),
       message: t.String(),
       data: schema ? schema : t.Optional(t.Undefined()),
+    });
+
+  static createPaginatedApiResponse = <T extends TSchema>(itemSchema: T) =>
+    t.Object({
+      success: t.Boolean(),
+      message: t.String(),
+      data: createPaginatedSchema(itemSchema),
     });
 }

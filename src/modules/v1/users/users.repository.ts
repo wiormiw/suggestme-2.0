@@ -16,8 +16,12 @@ export abstract class UserRepository {
     return await db.query.users.findFirst({ where: eq(users.email, email) });
   }
 
-  static async findAll(): Promise<User[]> {
-    return await db.query.users.findMany();
+  static async findAll(limit: number, cursor?: string): Promise<User[]> {
+    return await db.query.users.findMany({
+      limit: limit + 1,
+      orderBy: (users, { asc }) => [asc(users.id)],
+      where: (users, { gt }) => (cursor ? gt(users.id, cursor) : undefined),
+    });
   }
 
   static async update(id: string, data: Partial<NewUser>): Promise<User | undefined> {

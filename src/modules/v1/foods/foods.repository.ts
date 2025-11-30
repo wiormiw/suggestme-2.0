@@ -17,8 +17,12 @@ export abstract class FoodsRepository {
     });
   }
 
-  static async findAll(): Promise<Food[]> {
-    return await db.query.foods.findMany();
+  static async findAll(limit: number, cursor?: string): Promise<Food[]> {
+    return await db.query.foods.findMany({
+      limit: limit + 1,
+      orderBy: (foods, { asc }) => [asc(foods.id)],
+      where: (foods, { gt }) => (cursor ? gt(foods.id, cursor) : undefined),
+    });
   }
 
   static async findById(id: string): Promise<Food | undefined> {

@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { auth, ensureAuth } from '@/infrastructure/http/middlewares/auth.middleware';
 
 import { AppError } from '@/common/errors/app.error';
 import { ResponseFactory } from '@/common/utils/response.factory';
@@ -43,7 +44,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
         refreshToken,
       };
 
-      return ResponseFactory.success(authData, 'Registration successful');
+      return ResponseFactory.success(authData, 'Registration successful.');
     },
     {
       body: registerSchema,
@@ -85,7 +86,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
         refreshToken,
       };
 
-      return ResponseFactory.success(authData, 'Login successful');
+      return ResponseFactory.success(authData, 'Login successful.');
     },
     {
       body: loginSchema,
@@ -97,13 +98,13 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
     '/refresh',
     async ({ jwtAccess, jwtRefresh, cookie }) => {
       const refreshTokenCookie = cookie.refresh_token.value;
-      if (!refreshTokenCookie) throw new AppError('UNAUTHORIZED', 'No refresh token', 401);
+      if (!refreshTokenCookie) throw new AppError('UNAUTHORIZED', 'No refresh token.', 401);
 
       const token = refreshTokenCookie as string | undefined;
       const payload = await jwtRefresh.verify(token);
 
       if (!payload) {
-        throw new AppError('UNAUTHORIZED', 'Invalid refresh token', 401);
+        throw new AppError('UNAUTHORIZED', 'Invalid refresh token.', 401);
       }
 
       const result = await UserService.getById(payload.id);
@@ -137,23 +138,24 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
         refreshToken,
       };
 
-      return ResponseFactory.success(authData, 'Token refreshed');
+      return ResponseFactory.success(authData, 'Token refreshed.');
     },
     {
       response: ResponseFactory.createApiResponse(authResponseSchema),
       detail: { summary: 'Refresh access token' },
     },
   )
+  .use(auth)
   .post(
     '/logout',
-    ({ cookie }) => {
-      delete cookie.access_token;
-      delete cookie.refresh_token;
+    ({ cookie: { access_token, refresh_token } }) => {
+      access_token.remove();
+      refresh_token.remove();
 
-      return ResponseFactory.success(undefined, 'Logout successful');
+      return ResponseFactory.success(undefined, 'Logout successful.');
     },
     {
-      isAuth: true,
+      beforeHandle: ({ user }) => ensureAuth({ user }),
       response: ResponseFactory.createApiResponse(),
       detail: { summary: 'Logout user' },
     },

@@ -1,4 +1,5 @@
 import { mapDbError } from '@/infrastructure/db';
+import { PaginatedList } from '@/types/paginated';
 
 import { Mood } from '@/common/constants/foods.constants.ts';
 import { AppError } from '@/common/errors/app.error';
@@ -51,10 +52,18 @@ export abstract class FoodService {
     }
   }
 
-  static async getAllFoods(): Promise<Result<FoodResponseDto[], AppError>> {
+  static async getAllFoods(
+    limit: number,
+    cursor?: string,
+  ): Promise<Result<PaginatedList<FoodResponseDto>, AppError>> {
     try {
-      const foods = await FoodsRepository.findAll();
-      return ok(FoodMapper.toDtoList(foods));
+      const foods = await FoodsRepository.findAll(limit, cursor);
+      let nextCursor: string | null = null;
+      if (foods.length > limit) {
+        foods.pop(); // proved there's more item
+        nextCursor = foods[foods.length - 1].id; // last item id
+      }
+      return ok({ items: FoodMapper.toDtoList(foods), nextCursor });
     } catch (e) {
       return err(mapDbError(e));
     }

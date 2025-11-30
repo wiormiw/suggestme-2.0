@@ -1,4 +1,5 @@
 import { mapDbError } from '@/infrastructure/db';
+import { PaginatedList } from '@/types/paginated';
 
 import { AppError } from '@/common/errors/app.error';
 import { AuthUtil } from '@/common/utils/auth.util';
@@ -77,10 +78,18 @@ export abstract class UserService {
     }
   }
 
-  static async getAllUsers(): Promise<Result<UserResponseDto[], AppError>> {
+  static async getAllUsers(
+    limit: number,
+    cursor?: string,
+  ): Promise<Result<PaginatedList<UserResponseDto>, AppError>> {
     try {
-      const users = await UserRepository.findAll();
-      return ok(UserMapper.toDtoList(users));
+      const users = await UserRepository.findAll(limit, cursor);
+      let nextCursor: string | null = null;
+      if (users.length > limit) {
+        users.pop(); // proved there's more item
+        nextCursor = users[users.length - 1].id; // last item id
+      }
+      return ok({ items: UserMapper.toDtoList(users), nextCursor });
     } catch (e) {
       return err(mapDbError(e));
     }
