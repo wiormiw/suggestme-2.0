@@ -1,4 +1,4 @@
-import { boolean, pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { boolean, pgEnum, pgTable, text, uuid, unique } from 'drizzle-orm/pg-core';
 
 import { MOOD_LIST } from '@/common/constants/foods.constants.ts';
 
@@ -11,7 +11,9 @@ export const foods = pgTable('foods', {
   mood: moodEnum('mood').notNull(),
   isAvailable: boolean('is_available').default(true).notNull(),
   ...auditSchema,
-});
+}, (table) => [
+  unique().on(table.name),
+]);
 
 // Infer Types
 export type NewFood = typeof foods.$inferInsert;
