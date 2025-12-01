@@ -8,19 +8,21 @@ export abstract class ResponseFactory {
     return { requestId, success: true, message, data };
   }
 
-  static createApiResponse = <T extends TSchema | undefined>(schema?: T) =>
-    t.Object({
+  static createApiResponse<T extends TSchema | undefined>(schema?: T) {
+    return t.Object({
       requestId: t.String(),
       success: t.Boolean(),
       message: t.String(),
       data: schema ? schema : t.Optional(t.Undefined()),
     });
+  }
 
-  static createPaginatedApiResponse = <T extends TSchema>(itemSchema: T) =>
-    t.Object({
+  static createPaginatedApiResponse<T extends TSchema>(itemSchema: T) {
+    return t.Object({
       requestId: t.String(),
       success: t.Boolean(),
       message: t.String(),
       data: createPaginatedSchema(itemSchema),
     });
+  }
 }
