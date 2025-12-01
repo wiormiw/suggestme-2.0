@@ -1,4 +1,4 @@
-import { AuthUtil } from '../src/common/utils/auth.util';
+import { hashPassword } from '../src/common/utils/auth.util';
 import { db, pool } from '../src/infrastructure/db';
 import { users } from '../src/infrastructure/db/schema/users';
 
@@ -7,7 +7,7 @@ async function seedSuperAdmin() {
     console.log('🌱 Seeding superadmin...');
 
     const email = 'admin@suggestme.com';
-    const password = await AuthUtil.hashPassword('Admin123!');
+    const password = await hashPassword('Admin123!');
 
     await db
       .insert(users)
