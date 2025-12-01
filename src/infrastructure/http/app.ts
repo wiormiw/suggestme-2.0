@@ -24,7 +24,7 @@ export function createApp() {
             documentation: {
               info: {
                 title: 'SuggestMe API v2.0',
-                version: '1.0.0',
+                version: '2.0.0',
               },
               components: {
                 securitySchemes: {
@@ -116,7 +116,7 @@ export function createApp() {
       return response;
     })
     .get('/', () => ({ message: 'SuggestMe API v2.0' }))
-    .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString() }))
+    .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.0' }))
     .use(v1)
     .all('*', () => {
       return Response.json(
