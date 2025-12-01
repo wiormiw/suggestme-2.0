@@ -9,11 +9,45 @@ const server = createApp();
 server.listen(appEnv.PORT);
 log.info(`🦊 SuggestMe v2.0 Powered By Elysia is running at ${server.server?.hostname}:${server.server?.port}`);
 
+let isShuttingDown = false; // Shutdown flagging
+
 const shutdown = async () => {
+  if (isShuttingDown) {
+    log.warn('🛑 Shutdown already in progress. Ignoring signal...');
+    return;
+  }
+  
+  isShuttingDown = true;
   log.info('🛑 Shutting down gracefully...');
-  await pool.end();
-  await server.stop();
-  process.exit(0);
+
+  // DB Pool Cleanup
+  try {
+    log.info('⏳ Closing database pool...');
+    await pool.end();
+    log.info('✅ Database pool closed.');
+  } catch (e) {
+    if (e instanceof Error) {
+      log.error({ error: e } , `❌ Error closing database pool: ${e.message}`);  
+    } else {
+        log.error({ error: e } , '❌ Error closing database pool: Unknown error');
+    }
+  }
+
+  // HTTP Cleanup
+  try {
+    log.info('⏳ Stopping HTTP server...');
+    await server.stop();
+    log.info('✅ HTTP server stopped.');
+  } catch (e) {
+    if (e instanceof Error) {
+      log.error({ error: e }, `❌ Error stopping HTTP server: ${e.message}`);
+    } else {
+        log.error({ error: e }, '❌ Error stopping HTTP server: Unknown error');
+    }
+  }
+
+  log.info('👋 Shutdown complete. Exiting process...');
+  process.exit(0); 
 };
 
 process.on('SIGINT', shutdown);
