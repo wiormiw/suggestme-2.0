@@ -2,7 +2,7 @@ import { mapDbError } from '@/infrastructure/db';
 import { Direction, PaginatedList } from '@/types/paginated';
 
 import { AppError } from '@/common/errors/app.error';
-import { AuthUtil } from '@/common/utils/auth.util';
+import { hashPassword, verifyPassword } from '@/common/utils/auth.util';
 import { err, ok, Result } from '@/common/utils/result';
 
 import { UserMapper } from './users.mapper';
@@ -17,7 +17,7 @@ export abstract class UserService {
         return err(new AppError('CONFLICT', 'Email already registered', 409));
       }
 
-      const hashedPassword = await AuthUtil.hashPassword(dto.password);
+      const hashedPassword = await hashPassword(dto.password);
       const user = await UserRepository.create({
         id: Bun.randomUUIDv7(),
         email: dto.email,
@@ -43,7 +43,7 @@ export abstract class UserService {
         return err(new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
       }
 
-      const isValid = await AuthUtil.verifyPassword(dto.password, user.password);
+      const isValid = await verifyPassword(dto.password, user.password);
       if (!isValid) {
         return err(new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
       }
