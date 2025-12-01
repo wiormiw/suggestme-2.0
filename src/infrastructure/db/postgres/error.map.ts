@@ -6,13 +6,15 @@ interface PostgresError extends Error {
   detail?: string;
 }
 
+const isPostgresError = (e: any): e is PostgresError => {
+  return typeof e === 'object' && e !== null && 'code' in e && typeof e.code === 'string';
+};
+
 export const mapPostgresError = (error: unknown) => {
   if (error instanceof AppError) return error;
 
-  const pgError = error as PostgresError;
-
-  if (pgError.code) {
-    switch (pgError.code) {
+  if (isPostgresError(error)) {
+    switch (error.code) {
       case '23505':
         return new AppError('CONFLICT', 'Resource already exists.', 409);
       case '23503':
