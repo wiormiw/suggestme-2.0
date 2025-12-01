@@ -78,42 +78,46 @@ export function createApp() {
     .use(cookie())
     .use(helmet())
     .onError(({ code, error, set, requestId }): ApiFailure => {
-      let statusCode = 500;
-      let response: ApiFailure = {
-        requestId,
-        success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'An unexpected problem occured.',
-      };
-      requestId = requestId || 'N/A';
+      const currentRequestId = requestId || 'N/A';
+      let finalStatusCode = 500;
+      let finalResponse: ApiFailure;
+
       if (error instanceof AppError) {
-        statusCode = error.statusCode;
-        response = {
-          requestId,
+        finalStatusCode = error.statusCode;
+        finalResponse = {
+          requestId: currentRequestId,
           success: false,
           code: error.code,
           message: error.message,
           detail: error.detail,
         };
       } else if (code === 'VALIDATION') {
-        statusCode = 422;
-        response = {
-          requestId,
+        finalStatusCode = 422;
+        finalResponse = {
+          requestId: currentRequestId,
           success: false,
           code: 'VALIDATION_ERROR',
           message: 'Invalid request data.',
         };
 
         if (error instanceof ValidationError) {
-          response = {
-            ...response,
+          finalResponse = {
+            ...finalResponse,
             detail: { form_errors: error.all },
           };
         }
+      } else {
+        finalStatusCode = 500;
+        finalResponse = {
+          requestId: currentRequestId,
+          success: false,
+          code: 'INTERNAL_ERROR',
+          message: 'An unexpected problem occured.',
+        };
       }
 
-      set.status = statusCode;
-      return response;
+      set.status = finalStatusCode;
+      return finalResponse;
     })
     .get('/', () => ({ message: 'SuggestMe API v2.0' }))
     .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.0' }))
