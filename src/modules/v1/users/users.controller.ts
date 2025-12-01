@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { auth, ensureAdmin, ensureAuth } from '@/infrastructure/http/middlewares/auth.middleware';
+import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
 
-import { AppError } from '@/common/errors/app.error';
 import { paginatedQuery, uuidParamSchema } from '@/common/schemas/common.schema';
 import { ResponseFactory } from '@/common/utils/response.factory';
 
@@ -9,13 +9,14 @@ import { updateUserSchema, userResponseSchema } from './users.schema';
 import { UserService } from './users.service';
 
 export const usersController = new Elysia({ prefix: '/users', tags: ['Users'] })
+  .use(requestIdPlugin)
   .use(auth)
   .get(
     '/me',
-    async ({ user }) => {
+    async ({ requestId, user }) => {
       const result = await UserService.getProfile(user!.id);
       if (!result.success) throw result.error;
-      return ResponseFactory.success(result.data, 'Profile retrieved.');
+      return ResponseFactory.success(requestId, result.data, 'Profile retrieved.');
     },
     {
       beforeHandle: ({ user }) => ensureAuth({ user }),
@@ -31,10 +32,10 @@ export const usersController = new Elysia({ prefix: '/users', tags: ['Users'] })
       app
         .get(
           '/',
-          async ({ query: { limit, cursor, direction } }) => {
+          async ({ requestId, query: { limit, cursor, direction } }) => {
             const result = await UserService.getAllUsers(limit, cursor, direction);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Users retrieved.');
+            return ResponseFactory.success(requestId, result.data, 'Users retrieved.');
           },
           {
             query: paginatedQuery,
@@ -44,10 +45,10 @@ export const usersController = new Elysia({ prefix: '/users', tags: ['Users'] })
         )
         .patch(
           '/:id',
-          async ({ params: { id }, body }) => {
+          async ({ requestId, params: { id }, body }) => {
             const result = await UserService.updateUser(id, body);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'User updated.');
+            return ResponseFactory.success(requestId, result.data, 'User updated.');
           },
           {
             params: uuidParamSchema,
@@ -58,10 +59,10 @@ export const usersController = new Elysia({ prefix: '/users', tags: ['Users'] })
         )
         .delete(
           '/:id',
-          async ({ params: { id } }) => {
+          async ({ requestId, params: { id } }) => {
             const result = await UserService.deleteUser(id);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'User deleted.');
+            return ResponseFactory.success(requestId, result.data, 'User deleted.');
           },
           {
             params: uuidParamSchema,

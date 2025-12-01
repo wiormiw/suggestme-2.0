@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { auth, ensureAuth } from '@/infrastructure/http/middlewares/auth.middleware';
+import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
 
 import { AppError } from '@/common/errors/app.error';
 import { ResponseFactory } from '@/common/utils/response.factory';
@@ -8,11 +9,12 @@ import { authResponseSchema, loginSchema, registerSchema } from '@/modules/v1/us
 import { UserService } from '@/modules/v1/users/users.service';
 
 export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
+  .use(requestIdPlugin)
   .use(jwtAccess)
   .use(jwtRefresh)
   .post(
     '/register',
-    async ({ body, jwtAccess, jwtRefresh, cookie }) => {
+    async ({ requestId, body, jwtAccess, jwtRefresh, cookie }) => {
       const result = await UserService.register(body);
       if (!result.success) throw result.error;
 
@@ -44,7 +46,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
         refreshToken,
       };
 
-      return ResponseFactory.success(authData, 'Registration successful.');
+      return ResponseFactory.success(requestId, authData, 'Registration successful.');
     },
     {
       body: registerSchema,
@@ -54,7 +56,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
   )
   .post(
     '/login',
-    async ({ body, jwtAccess, jwtRefresh, cookie }) => {
+    async ({ requestId, body, jwtAccess, jwtRefresh, cookie }) => {
       const result = await UserService.login(body);
       if (!result.success) throw result.error;
 
@@ -86,7 +88,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
         refreshToken,
       };
 
-      return ResponseFactory.success(authData, 'Login successful.');
+      return ResponseFactory.success(requestId, authData, 'Login successful.');
     },
     {
       body: loginSchema,
@@ -96,7 +98,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
   )
   .post(
     '/refresh',
-    async ({ jwtAccess, jwtRefresh, cookie }) => {
+    async ({ requestId, jwtAccess, jwtRefresh, cookie }) => {
       const refreshTokenCookie = cookie.refresh_token.value;
       if (!refreshTokenCookie) throw new AppError('UNAUTHORIZED', 'No refresh token.', 401);
 
@@ -138,7 +140,7 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
         refreshToken,
       };
 
-      return ResponseFactory.success(authData, 'Token refreshed.');
+      return ResponseFactory.success(requestId, authData, 'Token refreshed.');
     },
     {
       response: ResponseFactory.createApiResponse(authResponseSchema),
@@ -148,11 +150,11 @@ export const authController = new Elysia({ prefix: '/auth', tags: ['Auth'] })
   .use(auth)
   .post(
     '/logout',
-    ({ cookie: { access_token, refresh_token } }) => {
+    ({ requestId, cookie: { access_token, refresh_token } }) => {
       access_token.remove();
       refresh_token.remove();
 
-      return ResponseFactory.success(undefined, 'Logout successful.');
+      return ResponseFactory.success(requestId, undefined, 'Logout successful.');
     },
     {
       beforeHandle: ({ user }) => ensureAuth({ user }),

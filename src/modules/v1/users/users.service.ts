@@ -81,7 +81,7 @@ export abstract class UserService {
   static async getAllUsers(
     limit: number,
     cursor?: string,
-    direction: Direction = 'next'
+    direction: Direction = 'next',
   ): Promise<Result<PaginatedList<UserResponseDto>, AppError>> {
     try {
       const users = await UserRepository.findAll(limit, cursor, direction);

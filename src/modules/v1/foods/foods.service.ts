@@ -55,7 +55,7 @@ export abstract class FoodService {
   static async getAllFoods(
     limit: number,
     cursor?: string,
-    direction: Direction = 'next'
+    direction: Direction = 'next',
   ): Promise<Result<PaginatedList<FoodResponseDto>, AppError>> {
     try {
       const foods = await FoodsRepository.findAll(limit, cursor, direction);

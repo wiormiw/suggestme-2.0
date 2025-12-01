@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { auth, ensureAdmin, ensureAuth } from '@/infrastructure/http/middlewares/auth.middleware';
+import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
 
 import { MOOD_LIST } from '@/common/constants/foods.constants';
 import { paginatedQuery, uuidParamSchema } from '@/common/schemas/common.schema';
@@ -10,6 +11,7 @@ import { FoodService } from './foods.service';
 
 export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
   .use(auth)
+  .use(requestIdPlugin)
   .guard(
     {
       beforeHandle: ({ user }) => ensureAuth({ user }),
@@ -18,10 +20,10 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
       app
         .get(
           '/suggest/:mood',
-          async ({ params: { mood } }) => {
+          async ({ requestId, params: { mood } }) => {
             const result = await FoodService.suggest(mood);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Food suggestion.');
+            return ResponseFactory.success(requestId, result.data, 'Food suggestion.');
           },
           {
             params: t.Object({ mood: t.UnionEnum([...MOOD_LIST]) }),
@@ -31,10 +33,10 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
         )
         .get(
           '/',
-          async ({ query: { limit, cursor, direction } }) => {
+          async ({ requestId, query: { limit, cursor, direction } }) => {
             const result = await FoodService.getAllFoods(limit, cursor, direction);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Foods retrieved.');
+            return ResponseFactory.success(requestId, result.data, 'Foods retrieved.');
           },
           {
             query: paginatedQuery,
@@ -44,10 +46,10 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
         )
         .get(
           '/:id',
-          async ({ params: { id } }) => {
+          async ({ requestId, params: { id } }) => {
             const result = await FoodService.getFoodById(id);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Food retrieved.');
+            return ResponseFactory.success(requestId, result.data, 'Food retrieved.');
           },
           {
             params: uuidParamSchema,
@@ -64,10 +66,10 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
       app
         .post(
           '/',
-          async ({ body }) => {
+          async ({ requestId, body }) => {
             const result = await FoodService.addFood(body);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Food created.');
+            return ResponseFactory.success(requestId, result.data, 'Food created.');
           },
           {
             body: createFoodSchema,
@@ -77,10 +79,10 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
         )
         .patch(
           '/:id',
-          async ({ params: { id }, body }) => {
+          async ({ requestId, params: { id }, body }) => {
             const result = await FoodService.updateFood(id, body);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Food updated.');
+            return ResponseFactory.success(requestId, result.data, 'Food updated.');
           },
           {
             params: uuidParamSchema,
@@ -91,10 +93,10 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
         )
         .delete(
           '/:id',
-          async ({ params: { id } }) => {
+          async ({ requestId, params: { id } }) => {
             const result = await FoodService.deleteFood(id);
             if (!result.success) throw result.error;
-            return ResponseFactory.success(result.data, 'Food deleted.');
+            return ResponseFactory.success(requestId, result.data, 'Food deleted.');
           },
           {
             params: uuidParamSchema,

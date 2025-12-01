@@ -1,17 +1,22 @@
-import { Elysia } from 'elysia';
+import { Elysia, ValidationError } from 'elysia';
 import { helmet } from 'elysia-helmet';
 import cookie from '@elysiajs/cookie';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
+import { appEnv, logConfig } from '@/config';
+import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
 import { ApiFailure } from '@/types/api';
+import { InferContext, logger } from '@bogeychan/elysia-logger';
 
 import { AppError } from '@/common/errors/app.error';
 import { v1 } from '@/modules/v1';
 
-import { appEnv } from '../../config';
+const baseApp = new Elysia().use(requestIdPlugin);
+
+type App = typeof baseApp;
 
 export function createApp() {
-  return new Elysia()
+  return baseApp
     .use(
       appEnv.NODE_ENV !== 'production'
         ? swagger({
@@ -35,8 +40,35 @@ export function createApp() {
         : (app) => app,
     )
     .use(
+      logger({
+        customProps(ctx: InferContext<App>) {
+          return {
+            requestId: ctx.requestId,
+          };
+        },
+        ...logConfig,
+      }),
+    )
+    .use(
       cors({
-        origin: appEnv.CORS_ORIGIN,
+        origin: ({ headers }) => {
+          const incomingOrigin = headers.get('origin');
+
+          if (!incomingOrigin) return true;
+
+          const allowedOrigins = Array.isArray(appEnv.CORS_ORIGIN)
+            ? appEnv.CORS_ORIGIN
+            : [appEnv.CORS_ORIGIN];
+
+          if (allowedOrigins.includes(incomingOrigin)) {
+            return true;
+          }
+          throw new AppError(
+            'CORS_ERROR',
+            'The Origin is not allowed to access this resource.',
+            403,
+          );
+        },
         credentials: true,
         exposeHeaders: appEnv.CORS_EXPOSED_HEADERS,
         allowedHeaders: appEnv.CORS_ALLOWED_HEADERS,
@@ -45,16 +77,19 @@ export function createApp() {
     )
     .use(cookie())
     .use(helmet())
-    .onError(({ code, error, set }): ApiFailure => {
+    .onError(({ code, error, set, requestId }): ApiFailure => {
       let statusCode = 500;
       let response: ApiFailure = {
+        requestId,
         success: false,
         code: 'INTERNAL_ERROR',
         message: 'An unexpected problem occured.',
       };
+      requestId = requestId || 'N/A';
       if (error instanceof AppError) {
         statusCode = error.statusCode;
         response = {
+          requestId,
           success: false,
           code: error.code,
           message: error.message,
@@ -63,11 +98,18 @@ export function createApp() {
       } else if (code === 'VALIDATION') {
         statusCode = 422;
         response = {
+          requestId,
           success: false,
           code: 'VALIDATION_ERROR',
           message: 'Invalid request data.',
-          detail: { form_errors: error.all },
         };
+
+        if (error instanceof ValidationError) {
+          response = {
+            ...response,
+            detail: { form_errors: error.all },
+          };
+        }
       }
 
       set.status = statusCode;

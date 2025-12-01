@@ -34,4 +34,15 @@ if (!_env.success) {
 }
 
 // Safe used env
-export const appEnv = _env.data;
+const appEnv = _env.data;
+
+// Logger
+const logConfig = {
+  level: appEnv.NODE_ENV === 'production' ? 'info' : 'debug',
+  transport: {
+    target: appEnv.NODE_ENV === 'production' ? 'pino-syslog' : 'pino-pretty',
+  },
+  enabled: appEnv.NODE_ENV !== 'test',
+};
+
+export { appEnv, logConfig };
