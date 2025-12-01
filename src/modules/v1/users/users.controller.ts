@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
-import { auth, ensureAdmin, ensureAuth } from '@/infrastructure/http/middlewares/auth.middleware';
-import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
+import { auth, ensureAdmin, ensureAuth } from '@/infrastructure/http/plugins/auth.plugins';
+import { requestIdPlugin } from '@/infrastructure/http/plugins/request.id.plugins';
 
 import { paginatedQuery, uuidParamSchema } from '@/common/schemas/common.schema';
 import { ResponseFactory } from '@/common/utils/response.factory';

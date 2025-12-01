@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
-import { auth, ensureAuth } from '@/infrastructure/http/middlewares/auth.middleware';
-import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
+import { auth, ensureAuth } from '@/infrastructure/http/plugins/auth.plugins';
+import { requestIdPlugin } from '@/infrastructure/http/plugins/request.id.plugins';
 
 import { AppError } from '@/common/errors/app.error';
 import { ResponseFactory } from '@/common/utils/response.factory';

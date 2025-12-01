@@ -4,7 +4,7 @@ import cookie from '@elysiajs/cookie';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { appEnv, logConfig } from '@/config';
-import { requestIdPlugin } from '@/infrastructure/http/middlewares/request.id.middleware';
+import { requestIdPlugin } from '@/infrastructure/http/plugins/request.id.plugins';
 import { ApiFailure } from '@/types/api';
 import { InferContext, logger } from '@bogeychan/elysia-logger';
 
