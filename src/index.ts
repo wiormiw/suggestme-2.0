@@ -7,7 +7,7 @@ import { log } from '@/common/utils/standalone.logger';
 const server = createApp();
 
 server.listen(appEnv.PORT);
-log.info(`🦊 Elysia is running at ${server.server?.hostname}:${server.server?.port}`);
+log.info(`🦊 SuggestMe v2.0 Powered By Elysia is running at ${server.server?.hostname}:${server.server?.port}`);
 
 const shutdown = async () => {
   log.info('🛑 Shutting down gracefully...');
