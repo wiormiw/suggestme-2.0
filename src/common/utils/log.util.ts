@@ -1,6 +1,6 @@
 import { log } from './standalone.logger';
 
-export function normalizeErrorLog(e: unknown, contextMessage: string) {
+export const normalizeErrorLog = (e: unknown, contextMessage: string) => {
   // Initialize the logging object
   let logObject: any = {};
   let message = `🚨 ${contextMessage}`;
@@ -17,4 +17,4 @@ export function normalizeErrorLog(e: unknown, contextMessage: string) {
 
   // Log the error
   log.error(logObject, message);
-}
+};
