@@ -21,3 +21,5 @@ export const db = drizzle(pool, {
   schema,
   logger: appEnv?.NODE_ENV === 'development',
 });
+
+export type DBSchema = typeof schema;
