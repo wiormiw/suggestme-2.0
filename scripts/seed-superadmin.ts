@@ -1,15 +1,16 @@
-import { hashPassword } from '../src/common/utils/auth.util';
-import { db, pool } from '../src/infrastructure/db';
-import { users } from '../src/infrastructure/db/schema/users';
+import { users } from '@/infrastructure/db/schema/users';
+import { DBTransaction } from '@/types/db';
 
-export async function seedSuperAdmin() {
+import { hashPassword } from '@/common/utils/auth.util';
+
+export async function seedSuperAdmin(tx: DBTransaction) {
   try {
     console.log('🌱 Seeding superadmin...');
 
     const email = 'admin@suggestme.com';
     const password = await hashPassword('Admin123!');
 
-    await db
+    await tx
       .insert(users)
       .values({
         id: Bun.randomUUIDv7(),
