@@ -25,5 +25,6 @@ export async function seedSuperAdmin() {
     console.log('🔑 Password: Admin123!');
   } catch (error) {
     console.error('❌ Error seeding superadmin:', error);
+    throw error;
   }
 }
