@@ -1,4 +1,4 @@
-import { t } from 'elysia';
+import { Static, t } from 'elysia';
 
 import { MOOD_LIST } from '@/common/constants/foods.constants';
 import { idResponseSchema } from '@/common/schemas/common.schema';
@@ -19,7 +19,12 @@ export const foodResponseSchema = t.Object({
   isAvailable: t.Boolean(),
 });
 
+export const suggestedFoodSchema = t.Object({
+  suggestedName: t.String(),
+});
+
 // Infer Types
-export type CreateFoodDto = typeof createFoodSchema.static;
-export type CreateFoodResponseDto = typeof createFoodResponseSchema.static;
-export type FoodResponseDto = typeof foodResponseSchema.static;
+export type CreateFoodDto = Static<typeof createFoodSchema>;
+export type CreateFoodResponseDto = Static<typeof createFoodResponseSchema>;
+export type FoodResponseDto = Static<typeof foodResponseSchema>;
+export type SuggestedFoodDto = Static<typeof suggestedFoodSchema>;

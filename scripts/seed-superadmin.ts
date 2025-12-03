@@ -2,7 +2,7 @@ import { hashPassword } from '../src/common/utils/auth.util';
 import { db, pool } from '../src/infrastructure/db';
 import { users } from '../src/infrastructure/db/schema/users';
 
-async function seedSuperAdmin() {
+export async function seedSuperAdmin() {
   try {
     console.log('🌱 Seeding superadmin...');
 
@@ -25,9 +25,5 @@ async function seedSuperAdmin() {
     console.log('🔑 Password: Admin123!');
   } catch (error) {
     console.error('❌ Error seeding superadmin:', error);
-  } finally {
-    await pool.end();
   }
 }
-
-seedSuperAdmin();

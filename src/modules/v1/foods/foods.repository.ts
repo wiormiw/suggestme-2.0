@@ -33,6 +33,14 @@ export abstract class FoodsRepository {
     });
   }
 
+  static async findSampleForAI(): Promise<Food[]> {
+    return await db.query.foods.findMany({
+      limit: 100,
+      where: (foods, { eq }) => eq(foods.isAvailable, true),
+      orderBy: sql`RANDOM()`,
+    });
+  }
+
   static async findById(id: string): Promise<Food | undefined> {
     return await db.query.foods.findFirst({ where: eq(foods.id, id) });
   }

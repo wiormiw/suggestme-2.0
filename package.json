@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "seed:admin": "bun run scripts/seed-superadmin.ts",
+    "seed": "bun run scripts/index.ts",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:purge": "docker compose down --volumes"
@@ -21,6 +21,7 @@
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/swagger": "^1.3.1",
+    "@google/genai": "^1.30.0",
     "drizzle-orm": "^0.44.7",
     "elysia": "^1.4.17",
     "elysia-helmet": "^3.0.0",

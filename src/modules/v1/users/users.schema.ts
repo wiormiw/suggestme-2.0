@@ -1,4 +1,4 @@
-import { t } from 'elysia';
+import { Static, t } from 'elysia';
 
 import { ROLE_LIST } from '@/common/constants/users.constants';
 
@@ -34,8 +34,8 @@ export const authResponseSchema = t.Object({
   refreshToken: t.String(),
 });
 
-export type RegisterDto = typeof registerSchema.static;
-export type LoginDto = typeof loginSchema.static;
-export type UpdateUserDto = typeof updateUserSchema.static;
-export type UserResponseDto = typeof userResponseSchema.static;
-export type AuthResponseDto = typeof authResponseSchema.static;
+export type RegisterDto = Static<typeof registerSchema>;
+export type LoginDto = Static<typeof loginSchema>;
+export type UpdateUserDto = Static<typeof updateUserSchema>;
+export type UserResponseDto = Static<typeof userResponseSchema>;
+export type AuthResponseDto = Static<typeof authResponseSchema>;

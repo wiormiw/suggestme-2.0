@@ -1,3 +1,4 @@
+import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
 
 // Schema
@@ -23,6 +24,8 @@ const appEnvSchema = z.object({
     .string()
     .default('*')
     .transform((str) => (str === '*' ? str : str.split(',').map((s) => s.trim()))),
+  GEMINI_API_KEY: z.string().default('gemini'),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
 });
 
 // Parsing
@@ -35,6 +38,11 @@ if (!_env.success) {
 
 // Safe used env
 const appEnv = _env.data;
+
+// Ai Client
+export const aiClient = new GoogleGenAI({
+  apiKey: appEnv.GEMINI_API_KEY,
+});
 
 // Logger
 const logConfig = {

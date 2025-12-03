@@ -1,4 +1,5 @@
 import { AppError } from '@/common/errors/app.error';
+import { log } from '@/common/utils/standalone.logger';
 
 interface PostgresError extends Error {
   code: string;
@@ -11,6 +12,8 @@ const isPostgresError = (e: any): e is PostgresError => {
 };
 
 export const mapPostgresError = (error: unknown) => {
+  log.error(error);
+
   if (error instanceof AppError) return error;
 
   if (isPostgresError(error)) {
