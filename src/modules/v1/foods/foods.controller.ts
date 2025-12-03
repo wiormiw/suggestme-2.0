@@ -6,7 +6,12 @@ import { MOOD_LIST } from '@/common/constants/foods.constants';
 import { paginatedQuery, uuidParamSchema } from '@/common/schemas/common.schema';
 import { ResponseFactory } from '@/common/utils/response.factory';
 
-import { createFoodResponseSchema, createFoodSchema, foodResponseSchema } from './foods.schema';
+import {
+  createFoodResponseSchema,
+  createFoodSchema,
+  foodBaseResponseSchema,
+  foodResponseSchema,
+} from './foods.schema';
 import { FoodService } from './foods.service';
 
 export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
@@ -27,7 +32,7 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
           },
           {
             params: t.Object({ mood: t.UnionEnum([...MOOD_LIST]) }),
-            response: ResponseFactory.createApiResponse(foodResponseSchema),
+            response: ResponseFactory.createApiResponse(foodBaseResponseSchema),
             detail: { summary: 'Get food suggestion by mood' },
           },
         )

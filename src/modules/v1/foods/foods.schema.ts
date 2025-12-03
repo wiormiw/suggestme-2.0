@@ -12,6 +12,12 @@ export const createFoodSchema = t.Object({
 
 export const createFoodResponseSchema = idResponseSchema;
 
+export const foodBaseResponseSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  isAvailable: t.Boolean(),
+});
+
 export const foodResponseSchema = t.Object({
   id: t.String(),
   name: t.String(),
@@ -26,5 +32,6 @@ export const suggestedFoodSchema = t.Object({
 // Infer Types
 export type CreateFoodDto = Static<typeof createFoodSchema>;
 export type CreateFoodResponseDto = Static<typeof createFoodResponseSchema>;
+export type FoodBaseResponseDto = Static<typeof foodBaseResponseSchema>;
 export type FoodResponseDto = Static<typeof foodResponseSchema>;
 export type SuggestedFoodDto = Static<typeof suggestedFoodSchema>;

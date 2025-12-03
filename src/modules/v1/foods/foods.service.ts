@@ -11,6 +11,7 @@ import { FoodsRepository } from '@/modules/v1/foods/foods.repository.ts';
 import {
   CreateFoodDto,
   CreateFoodResponseDto,
+  FoodBaseResponseDto,
   FoodResponseDto,
   suggestedFoodSchema,
 } from '@/modules/v1/foods/foods.schema.ts';
@@ -40,7 +41,7 @@ export abstract class FoodService {
     }
   }
 
-  static async suggest(mood: Mood): Promise<Result<FoodResponseDto, AppError>> {
+  static async suggest(mood: Mood): Promise<Result<FoodBaseResponseDto, AppError>> {
     try {
       const foodSampleList = await FoodsRepository.findSampleForAI();
       if (foodSampleList.length === 0) {
@@ -103,7 +104,7 @@ export abstract class FoodService {
         }
       }
 
-      const food = FoodMapper.toDto(foodRaw);
+      const food = FoodMapper.toBaseDto(foodRaw);
       return ok(food);
     } catch (e) {
       return err(mapDbError(e));

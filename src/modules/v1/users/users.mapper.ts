@@ -14,6 +14,6 @@ export abstract class UserMapper {
   }
 
   static toDtoList(entities: User[]): UserResponseDto[] {
-    return entities.map((entity) => this.toDto(entity));
+    return entities.map((entity) => UserMapper.toDto(entity));
   }
 }
