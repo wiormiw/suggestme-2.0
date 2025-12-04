@@ -13,7 +13,7 @@ async function main() {
       await Promise.all([seedSuperAdmin(tx), seedFoods(tx)]);
     });
 
-    console.log('🎉 All seeding completed successfully!');
+    console.log('🎉 All seeding completed successfully :)');
   } catch (error) {
     console.error('🛑 Database seeding failed:', error);
   } finally {

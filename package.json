@@ -42,5 +42,11 @@
     "tsx": "^4.21.0",
     "typescript-eslint": "^8.48.1"
   },
-  "module": "src/index.js"
+  "module": "src/index.js",
+  "lint-staged": {
+    ".{ts,js}": "eslint — cache — fix",
+    ".{ts,js,css,md}": "prettier — write",
+    ".js": "eslint — cache — fix",
+    ".{js,css,md}": "prettier — write"
+  }
 }
