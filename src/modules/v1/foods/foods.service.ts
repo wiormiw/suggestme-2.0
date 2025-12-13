@@ -1,5 +1,6 @@
 import { aiClient, appEnv } from '@/config';
 import { mapDbError } from '@/infrastructure/db';
+import { UserProfile } from '@/infrastructure/db/types/composite';
 import { Direction, PaginatedList } from '@/types/paginated';
 
 import { Mood } from '@/common/constants/foods.constants.ts';
@@ -9,10 +10,15 @@ import { err, ok, Result } from '@/common/utils/result.ts';
 import { FoodMapper } from '@/modules/v1/foods/foods.mapper.ts';
 import { FoodsRepository } from '@/modules/v1/foods/foods.repository.ts';
 import {
+  CreateCommentDto,
   CreateFoodDto,
   CreateFoodResponseDto,
   FoodBaseResponseDto,
+  FoodCommentResponseDto,
+  FoodDetailResponseDto,
   FoodResponseDto,
+  RateFoodDto,
+  RateFoodResultDto,
   suggestedFoodSchema,
 } from '@/modules/v1/foods/foods.schema.ts';
 
@@ -159,6 +165,20 @@ export abstract class FoodService {
     }
   }
 
+  static async getFoodDetails(id: string): Promise<Result<FoodDetailResponseDto, AppError>> {
+    try {
+      const foodWithInteractions = await FoodsRepository.findByIdWithInteractions(id);
+
+      if (!foodWithInteractions) {
+        return err(new AppError('NOT_FOUND', 'Food not found', 404));
+      }
+
+      return ok(FoodMapper.toDetailDto(foodWithInteractions));
+    } catch (e) {
+      return err(mapDbError(e));
+    }
+  }
+
   static async updateFood(
     id: string,
     data: Partial<CreateFoodDto>,
@@ -178,6 +198,57 @@ export abstract class FoodService {
     try {
       await FoodsRepository.delete(id);
       return ok(undefined);
+    } catch (e) {
+      return err(mapDbError(e));
+    }
+  }
+
+  static async addComment(
+    user: UserProfile,
+    dto: CreateCommentDto,
+  ): Promise<Result<FoodCommentResponseDto, AppError>> {
+    try {
+      const newComment = await FoodsRepository.createComments({
+        id: Bun.randomUUIDv7(),
+        foodId: dto.foodId,
+        content: dto.content,
+        userId: user.id,
+      });
+
+      if (!newComment) {
+        return err(new AppError('DB_ERROR', 'Failed to save comment', 500));
+      }
+
+      return ok(FoodMapper.toCommentDtoFromParts(newComment, user));
+    } catch (e) {
+      return err(mapDbError(e));
+    }
+  }
+
+  static async rateFood(
+    user: UserProfile,
+    dto: RateFoodDto,
+  ): Promise<Result<RateFoodResultDto, AppError>> {
+    try {
+      await FoodsRepository.upsertFoodWithRating({
+        id: Bun.randomUUIDv7(),
+        foodId: dto.foodId,
+        userId: user.id,
+        rating: dto.rating,
+      });
+
+      const foodWithRatings = await FoodsRepository.findByIdWithInteractions(dto.foodId);
+
+      let newAverage = 0;
+      let count = 0; // Track count
+
+      if (foodWithRatings && foodWithRatings.ratings.length > 0) {
+        count = foodWithRatings.ratings.length;
+        const total = foodWithRatings.ratings.reduce((acc, curr) => acc + curr.rating, 0);
+        newAverage = Number((total / count).toFixed(1));
+      }
+
+      return ok({ average: newAverage, count });
     } catch (e) {
       return err(mapDbError(e));
     }

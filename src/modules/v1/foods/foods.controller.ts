@@ -10,6 +10,7 @@ import {
   createFoodResponseSchema,
   createFoodSchema,
   foodBaseResponseSchema,
+  foodDetailResponseSchema,
   foodResponseSchema,
 } from './foods.schema';
 import { FoodService } from './foods.service';
@@ -60,6 +61,19 @@ export const foodsController = new Elysia({ prefix: '/foods', tags: ['Foods'] })
             params: uuidParamSchema,
             response: ResponseFactory.createApiResponse(foodResponseSchema),
             detail: { summary: 'Get food by ID' },
+          },
+        )
+        .get(
+          '/:id/details',
+          async ({ requestId, params: { id } }) => {
+            const result = await FoodService.getFoodDetails(id);
+            if (!result.success) throw result.error;
+            return ResponseFactory.success(requestId, result.data, 'Food details retrieved.');
+          },
+          {
+            params: uuidParamSchema,
+            response: ResponseFactory.createApiResponse(foodDetailResponseSchema),
+            detail: { summary: 'Get food details by ID' },
           },
         ),
   )

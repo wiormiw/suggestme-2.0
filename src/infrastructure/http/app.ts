@@ -11,6 +11,8 @@ import { InferContext, logger } from '@bogeychan/elysia-logger';
 import { AppError } from '@/common/errors/app.error';
 import { v1 } from '@/modules/v1';
 
+import { ws } from './ws/ws';
+
 const baseApp = new Elysia().use(requestIdPlugin);
 
 type App = typeof baseApp;
@@ -119,6 +121,7 @@ export function createApp() {
       set.status = finalStatusCode;
       return finalResponse;
     })
+    .use(ws)
     .get('/', () => ({ message: 'SuggestMe API v2.0' }))
     .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.0' }))
     .use(v1)
