@@ -6,11 +6,11 @@ import { log } from '@/common/utils/standalone.logger';
 import { WebSocketController } from './ws.controller';
 import { WebSocketResponseSchema, WebsocketSchema } from './ws.schema';
 
-export const ws = new Elysia({ name: 'ws-service' }).use(auth).ws('/ws', {
+export const ws = new Elysia({ name: 'ws-handler' }).use(auth).ws('/ws', {
   body: WebsocketSchema,
   response: WebSocketResponseSchema,
   open(ws) {
-    const user = ws.data.user;
+    const { user } = ws.data;
     const userId = user?.id ?? 'guest';
     const username = user?.username ?? 'Guest';
 
@@ -47,7 +47,7 @@ export const ws = new Elysia({ name: 'ws-service' }).use(auth).ws('/ws', {
     }
   },
   close(ws) {
-    const user = ws.data.user;
+    const { user } = ws.data;
     const username = user?.username ?? 'Guest';
 
     log.info(

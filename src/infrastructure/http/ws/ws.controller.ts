@@ -1,14 +1,10 @@
 import { AuthContext } from '@/types/context';
-
-import { log } from '@/common/utils/standalone.logger';
 import { FoodService } from '@/modules/v1/foods/foods.service';
 
 import { WebsocketPayload, WebSocketResponse } from './ws.schema';
 
-type Context = AuthContext;
-
 export type WSContext = {
-  data: Context;
+  data: AuthContext;
   send: (data: WebSocketResponse) => void;
   subscribe: (topic: string) => void;
   isSubscribed: (topic: string) => boolean;
