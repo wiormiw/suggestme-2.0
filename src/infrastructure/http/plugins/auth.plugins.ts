@@ -7,7 +7,7 @@ import { jwtAccess } from '@/common/utils/setup.jwt';
 
 export const auth = new Elysia({ name: 'auth' })
   .use(jwtAccess)
-  .derive({ as: 'global' }, async ({ cookie: { access_token }, headers, jwtAccess }) => {
+  .resolve({ as: 'global' }, async ({ cookie: { access_token }, headers, jwtAccess }) => {
     let user: AuthUser | undefined;
     const accesTokenCookie = access_token?.value;
     const headerValue = headers.authorization?.slice(7);
@@ -24,16 +24,10 @@ export const auth = new Elysia({ name: 'auth' })
   });
 
 export const ensureAuth = ({ user }: AuthContext) => {
-  if (!user) {
-    throw new AppError('UNAUTHORIZED', 'Authentication required.', 401);
-  }
+  if (!user) throw new AppError('UNAUTHORIZED', 'Authentication required.', 401);
 };
 
 export const ensureAdmin = ({ user }: AuthContext) => {
-  if (!user) {
-    throw new AppError('UNAUTHORIZED', 'Authentication required.', 401);
-  }
-  if (user.role !== 'admin') {
-    throw new AppError('FORBIDDEN', 'Admin access required.', 403);
-  }
+  if (!user) throw new AppError('UNAUTHORIZED', 'Authentication required.', 401);
+  if (user.role !== 'admin') throw new AppError('FORBIDDEN', 'Admin access required.', 403);
 };

@@ -31,7 +31,7 @@ export const WebSocketController = {
 
   onUnsubscribe(ws: WSContext, data: Extract<WebsocketPayload, { type: 'unsubscribe' }>) {
     const { foodId } = data.payload;
-    
+
     if (ws.isSubscribed(`food-${foodId}`)) {
       ws.unsubscribe(`food-${foodId}`);
     }
