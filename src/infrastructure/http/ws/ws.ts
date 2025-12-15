@@ -8,6 +8,7 @@ import { WebSocketResponseSchema, WebsocketSchema } from './ws.schema';
 
 export const ws = new Elysia({ name: 'ws-handler' }).use(auth).ws('/ws', {
   body: WebsocketSchema,
+  response: WebSocketResponseSchema,
   open(ws) {
     const { user } = ws.data;
     const userId = user?.id ?? 'guest';
@@ -56,5 +57,5 @@ export const ws = new Elysia({ name: 'ws-handler' }).use(auth).ws('/ws', {
       },
       '[WS] Client Disconnected',
     );
-  },
+  }
 });
