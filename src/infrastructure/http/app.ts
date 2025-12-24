@@ -9,9 +9,9 @@ import { ApiFailure } from '@/types/api';
 import { InferContext, logger } from '@bogeychan/elysia-logger';
 
 import { AppError } from '@/common/errors/app.error';
-import { v1 } from '@/modules/v1';
 
-import { ws } from './ws/ws';
+import { v1 } from './api/v1';
+import { wsV1 } from './ws/v1';
 
 const baseApp = new Elysia().use(requestIdPlugin);
 
@@ -61,6 +61,11 @@ export function createApp() {
           const allowedOrigins = Array.isArray(appEnv.CORS_ORIGIN)
             ? appEnv.CORS_ORIGIN
             : [appEnv.CORS_ORIGIN];
+
+          // Wildcard case
+          if (allowedOrigins.includes('*')) {
+            return true;
+          }
 
           if (allowedOrigins.includes(incomingOrigin)) {
             return true;
@@ -121,7 +126,7 @@ export function createApp() {
       set.status = finalStatusCode;
       return finalResponse;
     })
-    .use(ws)
+    .use(wsV1)
     .get('/', () => ({ message: 'SuggestMe API v2.0' }))
     .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.0' }))
     .use(v1)
